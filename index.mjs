@@ -30,4 +30,5 @@ app.post("/upload", upload.single("file"), async (req, res) => {
   }
 });
 
-app.listen(10000, () => console.log("Server running"));
+// *** TOTO JE KRITICKÉ PRE RENDER ***
+app.listen(process.env.PORT || 10000, () => console.log("Server running"));
