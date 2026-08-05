@@ -15,18 +15,30 @@ app.post("/upload", upload.single("file"), async (req, res) => {
     const form = new FormData();
     form.append("file", new Blob([file.buffer]), file.originalname);
 
-    // Correct GoFile upload endpoint from your document
-    const response = await fetch("https://upload.gofile.io/uploadfile", {
+    // 1️⃣ Upload file
+    const uploadRes = await fetch("https://upload.gofile.io/uploadfile", {
       method: "POST",
       body: form
     });
 
-    const data = await response.json();
+    const uploadData = await uploadRes.json();
+    const contentId = uploadData?.data?.contentId;
 
-    // GoFile returns link inside data.data.downloadPage
-    const link = data?.data?.downloadPage;
+    if (!contentId) {
+      return res.json({ link: null });
+    }
 
-    res.json({ link });
+    // 2️⃣ Create direct download link
+    const directRes = await fetch(`https://api.gofile.io/contents/${contentId}/directlinks`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({})
+    });
+
+    const directData = await directRes.json();
+    const directLink = directData?.data?.directLink;
+
+    res.json({ link: directLink });
   } catch (err) {
     console.error(err);
     res.status(500).json({ link: null });
