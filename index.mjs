@@ -1,7 +1,7 @@
 import express from "express";
 import multer from "multer";
 import cors from "cors";
-import fetch from "node-fetch";
+import fetch, { FormData, Blob } from "node-fetch";
 
 const app = express();
 app.use(cors());
@@ -21,14 +21,14 @@ app.post("/upload", upload.single("file"), async (req, res) => {
     });
 
     const data = await response.json();
-    const link = data.data.downloadPage;
+
+    const link = data?.data?.downloadPage;
 
     res.json({ link });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "upload_failed" });
+    res.status(500).json({ link: null });
   }
 });
 
-// *** TOTO JE KRITICKÉ PRE RENDER ***
-app.listen(process.env.PORT || 10000, () => console.log("Server running"));
+app.listen(process.env.PORT || 10000);
