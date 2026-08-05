@@ -12,23 +12,28 @@ app.post("/upload", upload.single("file"), async (req, res) => {
   try {
     const file = req.file;
 
+    // 1️⃣ Upload file
     const form = new FormData();
     form.append("file", new Blob([file.buffer]), file.originalname);
 
-    // 1️⃣ Upload file
     const uploadRes = await fetch("https://upload.gofile.io/uploadfile", {
       method: "POST",
       body: form
     });
 
     const uploadData = await uploadRes.json();
-    const contentId = uploadData?.data?.contentId;
 
-    if (!contentId) {
-      return res.json({ link: null });
-    }
+    const folderId = uploadData?.data?.parentFolder;
+    if (!folderId) return res.json({ link: null });
 
-    // 2️⃣ Create direct download link
+    // 2️⃣ Get folder contents → find contentId
+    const folderRes = await fetch(`https://api.gofile.io/contents/${folderId}`);
+    const folderData = await folderRes.json();
+
+    const contentId = folderData?.data?.children?.[0]?.id;
+    if (!contentId) return res.json({ link: null });
+
+    // 3️⃣ Create direct download link
     const directRes = await fetch(`https://api.gofile.io/contents/${contentId}/directlinks`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
