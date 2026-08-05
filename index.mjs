@@ -15,13 +15,15 @@ app.post("/upload", upload.single("file"), async (req, res) => {
     const form = new FormData();
     form.append("file", new Blob([file.buffer]), file.originalname);
 
-    const response = await fetch("https://api.gofile.io/uploadFile", {
+    // Correct GoFile upload endpoint from your document
+    const response = await fetch("https://upload.gofile.io/uploadfile", {
       method: "POST",
       body: form
     });
 
     const data = await response.json();
 
+    // GoFile returns link inside data.data.downloadPage
     const link = data?.data?.downloadPage;
 
     res.json({ link });
